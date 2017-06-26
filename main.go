@@ -44,4 +44,6 @@ func main() {
 	for i = 1; i <= total_page; i++ {
 		<-art
 	}
+	close(cat)
+	close(art)
 }
