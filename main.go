@@ -5,6 +5,7 @@ import (
 	"generator/grab"
 	"generator/tools"
 	"strconv"
+	"runtime"
 )
 
 func processArticle(url string, art chan int64) {
@@ -17,6 +18,7 @@ func processArticle(url string, art chan int64) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	var config tools.Config = tools.ParseConfig()
 	var article_api string
 	var category_pi string
