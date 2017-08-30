@@ -3,7 +3,7 @@ package grab
 import (
 	"encoding/json"
 	"fmt"
-	"generator/tools"
+	"github.com/markbest/static/tools"
 	"io"
 	"os"
 	"strconv"

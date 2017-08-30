@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"generator/grab"
-	"generator/tools"
-	"strconv"
+	"github.com/markbest/static/grab"
+	"github.com/markbest/static/tools"
 	"runtime"
+	"strconv"
 )
 
 func processArticle(url string, art chan int64) {
