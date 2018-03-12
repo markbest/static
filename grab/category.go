@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 const category_tpl = "./static/tpl/category.tpl"
@@ -79,7 +80,7 @@ func GenerateCategoryLevel(c []Category) (string, string) {
 	return content, default_page
 }
 
-func GenerateStaticCategory(c []Category, cat chan int64) {
+func GenerateStaticCategory(c []Category, wgp *sync.WaitGroup) {
 	var static_file string = static_file_path + "index.html"
 	var f *os.File
 	var err error
@@ -103,6 +104,6 @@ func GenerateStaticCategory(c []Category, cat chan int64) {
 	content = strings.Replace(content, "{{footer}}", "Copyright © 2015 - 2017 markbest.site - 你的指尖有改变世界的力量 - All Rights Reserved.", -1)
 
 	io.WriteString(f, content) //写入文件
-	cat <- 1
+	wgp.Done()
 	fmt.Println("category grab complete!")
 }

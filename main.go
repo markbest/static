@@ -6,43 +6,43 @@ import (
 	"github.com/markbest/static/tools"
 	"runtime"
 	"strconv"
+	"sync"
 )
 
-func processArticle(url string, art chan int64) {
+func processArticle(url string, wgp *sync.WaitGroup) {
 	articles := grab.GetArticles(url)
 	for _, t := range articles.Data {
 		grab.GenerateStaticArticle(t)
 		fmt.Println("ID: " + strconv.FormatInt(t.Id, 10) + " article grab complete")
 	}
-	art <- 1
+	wgp.Done()
 }
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	var config tools.Config = tools.ParseConfig()
-	var article_api string
-	var category_pi string
+	wgp := &sync.WaitGroup{}
+
+	var config = tools.ParseConfig()
+	var articleApi, categoryApi string
 	for _, v := range config.Api {
-		article_api = v.Article
-		category_pi = v.Category
+		articleApi = v.Article
+		categoryApi = v.Category
 	}
 
 	//抓取分类数据
-	cat := make(chan int64)
-	category := grab.GetCategorys(category_pi)
-	go grab.GenerateStaticCategory(category, cat)
+	wgp.Add(1)
+	category := grab.GetCategorys(categoryApi)
+	go grab.GenerateStaticCategory(category, wgp)
 
 	//抓取文章数据
-	articles := grab.GetArticles(article_api)
-	total_page := articles.Total/articles.Per_page + 1
-	art := make(chan int64, total_page)
-	for i := 1; i <= total_page; i++ {
-		go processArticle(article_api+"?page="+strconv.FormatInt(i, 10), art)
+	var totalPage, i int64
+	articles := grab.GetArticles(articleApi)
+	totalPage = articles.Total/articles.Per_page + 1
+	for i = 1; i <= totalPage; i++ {
+		wgp.Add(1)
+		go processArticle(articleApi+"?page="+strconv.FormatInt(i, 10), wgp)
 	}
 
-	//从channel中获取
-	<-cat
-	for i := 1; i <= total_page; i++ {
-		<-art
-	}
+	//等待抓取完成
+	wgp.Wait()
 }
